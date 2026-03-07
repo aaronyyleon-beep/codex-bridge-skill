@@ -29,15 +29,17 @@ Build or maintain a bridge that receives Feishu robot messages, runs local `code
 - Support `text`, `post`, and forwarded/merged messages when the bridge needs to read forwarded content.
 - Persist session bindings to disk so bridge restarts do not drop context.
 - Read local Codex history from `CODEX_HOME` when implementing session browsing or switching.
-- Expose operator commands such as `/status`, `/session`, `/session list`, `/session search`, `/session use`, `/reset`, `/stop`, `/whoami`, and `/security`.
+- Make `/session` the primary history entrypoint when the operator wants to browse saved conversations.
+- Expose operator commands such as `/status`, `/session`, `/session current`, `/session list`, `/session search`, `/session use`, `/new`, `/reset`, `/stop`, `/whoami`, and `/security`.
 
 ## Verification
 
 - Start the bridge locally and confirm the Feishu long connection is established.
 - Send `/whoami` and `/security` to confirm ACLs.
-- Send `/status` and `/session` to confirm queue state and bound `codex_session_id`.
-- Send `/session list` or `/session search <query>` and verify local history is readable from `CODEX_HOME`.
+- Send `/status` and `/session current` to confirm queue state and bound `codex_session_id`.
+- Send `/session` or `/session search <query>` and verify local history is readable from `CODEX_HOME`.
 - Send `/session use <index|id>` and verify both the bound session id and chat workdir update as expected.
+- Send `/new` and confirm the chat starts a fresh Codex context.
 - Send two quick consecutive messages and verify merge-window and queue behavior match the intended UX.
 - If streaming changed, confirm the user sees one continuously edited message rather than many separate chunks.
 

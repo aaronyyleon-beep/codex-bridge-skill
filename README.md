@@ -9,6 +9,7 @@ Codex skill for building, debugging, and operating a Feishu bot that controls a 
 - Streamed replies through in-place Feishu message edits
 - Per-chat session continuity with `session_key -> codex_session_id`
 - Switching a Feishu chat back to saved local Codex sessions
+- Browsing saved sessions with `/session`, checking the active binding with `/session current`, and starting fresh with `/new`
 - Merge windows, per-chat queues, and workdir synchronization
 - ACLs, rate limits, and raw-command hardening
 

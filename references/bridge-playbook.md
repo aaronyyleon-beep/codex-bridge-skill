@@ -68,10 +68,12 @@ LOG_LEVEL=INFO
 - `/cmd <args>`: run raw Codex arguments if policy allows it
 - `/setwd <path>`: set the current chat workdir
 - `/status`: inspect running state, queue depth, merge buffer, workdir, and `codex_session_id`
-- `/session`: show the bound `codex_session_id`
+- `/session`: show recent local Codex sessions from `CODEX_HOME`
+- `/session current`: show the currently bound `codex_session_id`
 - `/session list [n]`: show recent local Codex sessions from `CODEX_HOME`
 - `/session search <query>`: search local Codex sessions by title or id
 - `/session use <index|id>`: bind the chat to a local Codex session and sync workdir when possible
+- `/new`: start a fresh chat context by clearing the current binding, queue, and merge buffer
 - `/session set <id>`: manually bind the chat to a Codex session
 - `/session clear`: clear the bound session
 - `/reset`: clear remembered context and queued work when idle
@@ -155,7 +157,11 @@ When binding a chat to a saved Codex session, read the session's `cwd` from sess
 
 ### Numeric `/session use` fails
 
-Numeric selection depends on the last `/session list` or `/session search` result cached for that chat. If there is no cached result, ask the operator to list or search first.
+Numeric selection depends on the last `/session`, `/session list`, or `/session search` result cached for that chat. If there is no cached result, ask the operator to list or search first.
+
+### Operator wants a brand new conversation
+
+Provide an explicit fresh-start command. `/new` should clear the current bound `codex_session_id`, queued jobs, and merge buffer so the next prompt starts a new session cleanly.
 
 ### Unauthorized control risk
 
@@ -173,8 +179,10 @@ Lock the bridge down before wider rollout:
 2. Confirm logs show the long connection started successfully.
 3. In Feishu, send `/whoami`, then update ACL settings if required.
 4. Send `/status` and verify the session map file, queue state, workdir, and local session index path.
-5. Send `/session list` or `/session search <query>` and confirm history entries are returned.
+5. Send `/session` or `/session search <query>` and confirm history entries are returned.
 6. Send `/session use <index|id>` and verify both `codex_session_id` and workdir update as expected.
-7. Send a normal prompt and watch whether the same message gets edited over time.
-8. Send two messages in quick succession and confirm they merge or queue according to the configured UX.
-9. Restart the bridge and verify `/session` still reports the prior binding when persistence is enabled.
+7. Send `/session current` and confirm the bound session details match the selection.
+8. Send `/new` and confirm the chat starts a fresh context.
+9. Send a normal prompt and watch whether the same message gets edited over time.
+10. Send two messages in quick succession and confirm they merge or queue according to the configured UX.
+11. Restart the bridge and verify the expected session binding behavior after persistence reload.
