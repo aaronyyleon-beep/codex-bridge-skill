@@ -1,0 +1,4 @@
+interface:
+  display_name: "Feishu Codex Bridge"
+  short_description: "Build and operate a Feishu-to-Codex bridge"
+  default_prompt: "Use $feishu-codex-bridge to build, debug, or harden a Feishu bot that controls local Codex."
