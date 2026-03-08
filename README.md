@@ -18,6 +18,7 @@ Codex skill for building, debugging, and operating a Feishu bot that controls a 
 - `SKILL.md`: main skill instructions and trigger description
 - `agents/openai.yaml`: UI metadata for skill pickers
 - `references/bridge-playbook.md`: operational details, commands, config, and troubleshooting
+- `assets/feishu-codex-bridge/`: bundled runnable reference implementation (`bridge.py`, `.env.example`, `README.md`)
 
 ## Install Manually
 
@@ -26,7 +27,7 @@ This repository contains one skill whose internal skill name is `feishu-codex-br
 ```bash
 git clone https://github.com/xllinbupt/feishu-codex-skill.git
 mkdir -p ~/.codex/skills/feishu-codex-bridge
-cp -R feishu-codex-skill/SKILL.md feishu-codex-skill/agents feishu-codex-skill/references ~/.codex/skills/feishu-codex-bridge/
+cp -R feishu-codex-skill/SKILL.md feishu-codex-skill/agents feishu-codex-skill/references feishu-codex-skill/assets ~/.codex/skills/feishu-codex-bridge/
 ```
 
 After that, invoke it in Codex with prompts such as:
@@ -35,6 +36,16 @@ After that, invoke it in Codex with prompts such as:
 $feishu-codex-bridge Help me debug why Feishu replies are not streaming.
 $feishu-codex-bridge Add support for switching a Feishu chat to a saved Codex session.
 ```
+
+## Bundled Code
+
+This repository also includes a runnable reference implementation under `assets/feishu-codex-bridge/`.
+
+- `bridge.py`: Feishu long-connection bridge implementation
+- `.env.example`: safe example configuration
+- `README.md`: usage notes for the bridge itself
+
+Sensitive runtime files are intentionally not included, such as `.env`, `.feishu_session_map.json`, or generated tokens.
 
 ## Notes
 

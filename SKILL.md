@@ -8,6 +8,7 @@ description: Build, debug, and operate a Feishu robot that controls local Codex 
 ## Overview
 
 Build or maintain a bridge that receives Feishu robot messages, runs local `codex`, and sends results back to Feishu. Prefer the existing local implementation at `/Users/linxiaoyi/feishu-codex-bridge` when it exists; inspect `README.md`, `.env.example`, and `bridge.py` before changing behavior.
+If the user wants a runnable starting point or asks for the actual bridge code, reuse the bundled reference implementation under `assets/feishu-codex-bridge/` instead of reconstructing files from scratch.
 
 ## Workflow
 
@@ -46,3 +47,4 @@ Build or maintain a bridge that receives Feishu robot messages, runs local `code
 ## Read References As Needed
 
 - Read `references/bridge-playbook.md` for config keys, operator commands, recommended defaults, and troubleshooting patterns seen in real usage.
+- Use `assets/feishu-codex-bridge/bridge.py`, `assets/feishu-codex-bridge/README.md`, and `assets/feishu-codex-bridge/.env.example` as the bundled runnable reference implementation.

@@ -8,11 +8,19 @@ Default local project path:
 
 - `/Users/linxiaoyi/feishu-codex-bridge`
 
+Bundled reference implementation inside this skill:
+
+- `assets/feishu-codex-bridge/bridge.py`
+- `assets/feishu-codex-bridge/README.md`
+- `assets/feishu-codex-bridge/.env.example`
+
 Key files to inspect first:
 
 - `README.md`
 - `.env.example`
 - `bridge.py`
+
+When the local project does not exist or the user wants code exported from the skill repository, prefer reusing the bundled files under `assets/feishu-codex-bridge/`.
 
 ## Preferred Architecture
 
