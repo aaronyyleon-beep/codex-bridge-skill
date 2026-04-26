@@ -43,6 +43,13 @@ CODEX_LOG_LINE_RE = re.compile(
     r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\s+"
     r"(?:TRACE|DEBUG|INFO|WARN|ERROR)\s+\S+:"
 )
+CODEX_NOISE_LINE_RE = re.compile(
+    r"^(?:"
+    r"Reading additional input from stdin\.\.\.|"
+    r"\[error\]\s+Reconnecting\.\.\.\s+\d+/\d+"
+    r"\s+\(timeout waiting for child process to exit\)"
+    r")$"
+)
 
 
 def load_dotenv(dotenv_path: Path) -> None:
@@ -1314,6 +1321,23 @@ class CodexBridge:
         cleaned = cleaned.lstrip("-*0123456789. ").strip()
         return cleaned
 
+    @staticmethod
+    def _is_codex_noise_line(text: str) -> bool:
+        line = text.strip()
+        if not line:
+            return False
+        return bool(CODEX_LOG_LINE_RE.match(line) or CODEX_NOISE_LINE_RE.match(line))
+
+    def _strip_codex_noise_text(self, text: str) -> str:
+        if not text:
+            return ""
+        kept = [
+            line
+            for line in text.splitlines()
+            if not self._is_codex_noise_line(line)
+        ]
+        return "\n".join(kept).strip()
+
     def _extract_memory_entry(
         self,
         *,
@@ -1328,6 +1352,10 @@ class CodexBridge:
         if not body:
             return ""
 
+        body = self._strip_codex_noise_text(body)
+        if not body:
+            return ""
+
         body = re.sub(r"\.\.\.\[truncated\]$", "", body, flags=re.IGNORECASE).strip()
         lines: List[str] = []
         for raw_line in body.splitlines():
@@ -1336,9 +1364,7 @@ class CodexBridge:
                 continue
             if line in {"[empty]"}:
                 continue
-            if CODEX_LOG_LINE_RE.match(line):
-                continue
-            if line.startswith("[codex exit="):
+            if self._is_codex_noise_line(line) or line.startswith("[codex exit="):
                 continue
             lines.append(line)
             if len(" ".join(lines)) >= self.settings.project_memory_entry_max_chars:
@@ -1469,7 +1495,8 @@ class CodexBridge:
         self._ensure_project_files(project_slug)
         path = self._today_daily_path(project_slug)
         now = dt.datetime.now().strftime("%H:%M")
-        output_preview = self._truncate_text(output_text.strip(), 500)
+        clean_output = self._strip_codex_noise_text(output_text)
+        output_preview = self._truncate_text(clean_output, 500)
         entry = (
             f"\n## {now} task\n"
             f"- workdir: {workdir}\n"
@@ -1496,7 +1523,10 @@ class CodexBridge:
             "updated_at": dt.datetime.now().isoformat(timespec="seconds"),
             "workdir": workdir,
             "last_user_request": user_prompt.strip(),
-            "last_result_preview": self._truncate_text(output_text.strip(), 500),
+            "last_result_preview": self._truncate_text(
+                self._strip_codex_noise_text(output_text),
+                500,
+            ),
         }
         try:
             path.write_text(
@@ -3226,7 +3256,7 @@ class CodexBridge:
         except json.JSONDecodeError:
             # `codex exec --json` occasionally emits Rust log lines. They are not
             # user-facing content and should not be relayed back to Feishu.
-            if CODEX_LOG_LINE_RE.match(stripped):
+            if self._is_codex_noise_line(stripped):
                 return "", saw_delta, ""
             return stripped + "\n", saw_delta, ""
 
