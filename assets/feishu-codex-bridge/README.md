@@ -63,6 +63,18 @@ cp launchd/com.codex.feishu-bridge.plist.example run/com.codex.feishu-bridge.pli
 里，也建议在 `.env` 中把 `CODEX_BIN` 写成完整路径，例如
 `/Applications/Codex.app/Contents/Resources/codex`。
 
+如果需要从飞书端让 Codex 执行宿主级操作（例如重启本机
+`launchctl` 服务、修改受保护目录、管理其他本地代理），需要在可信私有部署中把
+`.env` 设置为：
+
+```bash
+CODEX_SANDBOX=danger-full-access
+```
+
+默认值是 `workspace-write`，更适合日常使用。开启 `danger-full-access` 后，建议同时
+配置 `ALLOWED_OPEN_IDS` 或 `ALLOWED_CHAT_IDS`，并保持 `ENABLE_RAW_CMD=0`，避免群聊中
+的非授权用户触发高权限操作。
+
 加载服务：
 
 ```bash
@@ -136,3 +148,13 @@ launchctl bootout gui/$(id -u)/com.codex.feishu-bridge
 - 设置 `COMMAND_TOKEN`：每条指令前带口令，例如 `mytoken /codex 你好`。
 - 保持 `ENABLE_RAW_CMD=0`：禁用 `/cmd` 透传命令。
 - 设置合理限流：`RATE_LIMIT_PER_MINUTE` 防刷。
+
+## 9. 故障排查
+
+- 飞书端提示 `launchctl kickstart` 或类似宿主操作 `Operation not permitted`：通常是
+  `codex exec` 子进程仍在 `workspace-write` 沙箱里。确认当前运行目录的 `.env` 已设置
+  `CODEX_SANDBOX=danger-full-access`，并由宿主侧重启 LaunchAgent 使配置生效。
+- 改了源码目录 `.env` 但行为不变：确认实际运行目录是否是另一个副本，例如
+  `/tmp/feishu-codex-bridge`。长连接进程只会读取它工作目录里的 `.env`。
+- `launchctl kickstart` 从飞书端失败，但宿主终端可执行：优先从宿主侧执行
+  `launchctl bootout` 后再 `launchctl bootstrap`，避免让正在运行的桥接进程重启自己。
