@@ -48,6 +48,41 @@ python3 bridge.py
 
 看到日志 `long connection started` 即表示已连上。
 
+### macOS 后台运行（可选）
+
+如果希望长连接在终端关闭后继续运行，可以用 `launchctl` 托管：
+
+```bash
+cd /Users/linxiaoyi/feishu-codex-bridge
+mkdir -p run
+cp launchd/com.codex.feishu-bridge.plist.example run/com.codex.feishu-bridge.plist
+```
+
+编辑 `run/com.codex.feishu-bridge.plist`，把 `/ABS/PATH/TO/feishu-codex-bridge`
+和 `/Users/YOUR_USER` 改成本机实际路径。若 `codex` 不在系统默认 `PATH`
+里，也建议在 `.env` 中把 `CODEX_BIN` 写成完整路径，例如
+`/Applications/Codex.app/Contents/Resources/codex`。
+
+加载服务：
+
+```bash
+launchctl bootstrap gui/$(id -u) run/com.codex.feishu-bridge.plist
+launchctl print gui/$(id -u)/com.codex.feishu-bridge
+```
+
+查看日志：
+
+```bash
+tail -f run/bridge.err.log
+tail -f run/bridge.log
+```
+
+停止服务：
+
+```bash
+launchctl bootout gui/$(id -u)/com.codex.feishu-bridge
+```
+
 ## 6. 飞书内可用指令
 
 - `/codex <prompt>`: 执行 `codex exec --json`
